@@ -46,8 +46,9 @@ p { margin: 0 0 1em; }
 .section-inner { max-width: var(--max-width); margin: 0 auto; }
 
 /* Anchor-jump targets must clear the fixed header, or their top content
-   (e.g. the Visítanos logo) lands hidden underneath it. */
-section[id] { scroll-margin-top: 110px; }
+   (e.g. the Visítanos logo) lands hidden underneath it. Sized to the
+   tallest header state (desktop, ~173px) so it clears at every breakpoint. */
+section[id] { scroll-margin-top: 185px; }
 
 .eyebrow {
   font-family: var(--font-body);
@@ -123,7 +124,7 @@ section[id] { scroll-margin-top: 110px; }
   justify-content: space-between;
 }
 .brand-logo {
-  width: 120px;
+  width: 175px;
   height: auto;
   filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6)); /* keeps the logo readable over bright hero photos before scroll */
 }
@@ -278,6 +279,15 @@ section[id] { scroll-margin-top: 110px; }
   background-size: 106%;
 }
 
+/* logo-wall-clean.jpg (Visítanos storefront/signage photo) has its own thin
+   white sliver a few pixels inside its right edge. Its aspect ratio is close
+   to, but not identical to, the card's 4:3 box, so "cover" itself already
+   sits above 100% of the box width -- 106% isn't enough extra crop here.
+   108% gives a safe margin without visibly zooming into the sign. */
+.photo-placeholder.has-photo.trim-edge-strong {
+  background-size: 108%;
+}
+
 /* Small standalone photo card (Visit section interior shot) */
 .visit-photo {
   aspect-ratio: 4/3;
@@ -337,6 +347,31 @@ section[id] { scroll-margin-top: 110px; }
 .event-details { padding: 2.5rem; align-self: center; }
 .event-details h3 { font-size: 1.4rem; }
 .event-details p { color: var(--cream-dim); }
+.event-badge {
+  display: inline-block;
+  background: var(--red);
+  color: var(--cream);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+  margin-bottom: 0.9rem;
+}
+.event-details p.event-meta {
+  font-weight: 700;
+  color: var(--cream);
+  font-size: 1.05rem;
+  margin-bottom: 1rem;
+}
+.event-evergreen {
+  margin-top: 1.3rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid rgba(243,232,211,0.12);
+  color: var(--cream-dim);
+  font-size: 0.9rem;
+}
 .event-features {
   list-style: none;
   margin: 1.3rem 0;
@@ -463,7 +498,7 @@ select { appearance: auto; }
 }
 .visit-logo {
   display: block;
-  width: 190px;
+  width: 260px;
   height: auto;
   margin: 0 0 1.5rem;
 }
@@ -505,7 +540,7 @@ select { appearance: auto; }
 /* --- Footer --- */
 .site-footer { background: #060505; padding: 3rem 1.25rem 2rem; }
 .footer-inner { max-width: var(--max-width); margin: 0 auto; text-align: center; }
-.footer-logo { width: 100px; height: auto; margin: 0 auto 1.2rem; }
+.footer-logo { width: 158px; height: auto; margin: 0 auto 1.2rem; }
 .footer-socials { display: flex; gap: 1.5rem; justify-content: center; margin-bottom: 1rem; }
 .footer-socials a { font-weight: 600; letter-spacing: 0.02em; }
 .footer-socials a:hover { color: var(--red); }
@@ -538,6 +573,8 @@ a:focus-visible, button:focus-visible {
   .event-card { grid-template-columns: 1fr; }
   .catering-proof { grid-template-columns: 1fr; }
   .visit-grid { grid-template-columns: 1fr; }
+  .brand-logo { width: 135px; height: auto; }
+  .visit-logo { width: 220px; }
 }
 
 /* ===================================================
@@ -566,9 +603,9 @@ a:focus-visible, button:focus-visible {
   .dish-grid { grid-template-columns: 1fr 1fr; gap: 1rem; }
   .menu-grid { grid-template-columns: 1fr; }
   .form-row-split { grid-template-columns: 1fr; }
-  .brand-logo { width: 92px; height: auto; }
-  .footer-logo { width: 80px; height: auto; }
-  .visit-logo { width: 160px; margin: 0 auto 1.5rem; }
+  .brand-logo { width: 118px; height: auto; }
+  .footer-logo { width: 144px; height: auto; }
+  .visit-logo { width: 195px; margin: 0 auto 1.5rem; }
   .section { padding: 3.5rem 1.1rem; }
 }
 
