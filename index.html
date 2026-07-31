@@ -31,11 +31,12 @@
     </a>
 
     <nav class="main-nav" id="main-nav">
+      <a href="#mini-serie" class="nav-link">Mini-serie</a>
       <a href="#dishes" class="nav-link">Comida</a>
       <a href="#events" class="nav-link">Eventos</a>
-      <a href="#catering" class="nav-link">Catering</a>
-      <a href="#visit" class="nav-link">Visítanos</a>
-      <a href="tel:+19732464450" class="nav-cta">Llamar ahora</a>
+      <a href="catering/" class="nav-link">Catering</a>
+      <a href="quienessomos/" class="nav-link">Quiénes Somos</a>
+      <a href="#visit" class="nav-cta">Contáctanos</a>
     </nav>
 
     <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menú de navegación" aria-expanded="false" aria-controls="main-nav">
@@ -51,6 +52,15 @@
   <!-- ============ HERO ============ -->
   <section class="hero">
     <div class="photo-placeholder hero-photo has-photo" role="img" aria-label="Plato de ceviche y jalea peruana recién preparado" style="background-image: url('images/hero-ceviche-jalea.jpg');"></div>
+    <!--
+      Video de fondo del hero -- deshabilitado a propósito (SITE_CONFIG.ENABLE_HERO_VIDEO
+      en js/main.js). Sin <source> ni atributo autoplay en este HTML estático, el
+      navegador NUNCA solicita video/chimpun-hero-cooking.mp4 mientras esté deshabilitado.
+      El atributo poster ya apunta a la foto de ceviche actual (misma imagen que la capa
+      .hero-photo de abajo), lista para funcionar como imagen de carga en cuanto el video
+      real se agregue y esta bandera se active. Ver js/main.js para la lógica completa.
+    -->
+    <video id="hero-video" class="hero-video" poster="images/hero-ceviche-jalea.jpg" muted loop playsinline preload="none" aria-hidden="true"></video>
     <div class="hero-scrim"></div>
     <div class="hero-content">
       <p class="eyebrow">Sabor Chalaco &middot; Passaic, NJ</p>
@@ -58,8 +68,25 @@
       <p class="hero-sub">Ceviches, anticuchos y clásicos costeños peruanos — con todas las cremas.</p>
       <div class="hero-actions">
         <a href="#dishes" class="btn btn-primary">Explorar el menú</a>
-        <a href="#catering" class="btn btn-secondary">Planear un evento</a>
+        <a href="catering/" class="btn btn-secondary">Planear un evento</a>
       </div>
+    </div>
+  </section>
+
+  <!-- ============ MINI-SERIE ============ -->
+  <section class="section mini-serie" id="mini-serie">
+    <div class="section-inner">
+      <p class="eyebrow center">Mini-serie</p>
+      <h2 class="section-title center">Detrás de Chimpun Callao</h2>
+      <p class="section-lead center">Una mini-serie en YouTube sobre la comida, la cultura y las historias detrás de Chimpun Callao — los episodios nuevos se agregan directamente en YouTube, sin necesidad de actualizar este sitio.</p>
+
+      <div class="video-frame">
+        <div class="video-frame-inner" id="mini-serie-player"></div>
+      </div>
+
+      <p class="mini-serie-cta center">
+        <a id="mini-serie-youtube-link" href="#" target="_blank" rel="noopener" class="btn btn-outline">Ver en YouTube</a>
+      </p>
     </div>
   </section>
 
@@ -103,26 +130,26 @@
       <p class="section-lead center">Un adelanto de las categorías del menú — el menú completo y los precios se confirman con el restaurante.</p>
 
       <div class="menu-grid">
-        <div class="menu-category">
-          <h3>Desayunos</h3>
-          <p>Desayunos al estilo peruano para comenzar el día.</p>
-        </div>
         <div class="menu-category featured">
           <span class="menu-tag">Desde $10.99</span>
           <h3>Menú del Día</h3>
           <p>Un menú diario pensado para el valor y porciones generosas.</p>
         </div>
         <div class="menu-category">
-          <h3>Ceviches</h3>
-          <p>Ceviches frescos preparados al estilo costeño, al momento.</p>
+          <h3>A la Parrilla</h3>
+          <p>Anticuchos y clásicos peruanos preparados al fuego, con el sazón tradicional de la parrilla.</p>
         </div>
         <div class="menu-category">
-          <h3>Anticuchos y Parrilla</h3>
-          <p>Brochetas a la parrilla y clásicos peruanos preparados al fuego.</p>
+          <h3>Mariscos</h3>
+          <p>Platos de mariscos frescos preparados al estilo costeño peruano.</p>
         </div>
         <div class="menu-category">
-          <h3>Platos Destacados</h3>
-          <p>Nuestros platos más pedidos, preparados con dedicación.</p>
+          <h3>Comida Criolla</h3>
+          <p>Clásicos criollos peruanos, llenos de sabor y tradición familiar.</p>
+        </div>
+        <div class="menu-category">
+          <h3>Chifa</h3>
+          <p>Platos de inspiración chifa — la fusión peruano-china con todo su sabor.</p>
         </div>
       </div>
       <p class="menu-footnote center">El menú completo, la disponibilidad y los precios actuales se confirman directamente con el restaurante.</p>
@@ -135,132 +162,35 @@
       <p class="eyebrow center">Música en Vivo y Eventos</p>
       <h2 class="section-title center">Así se Vive en Chimpun Callao</h2>
 
-      <!-- FEATURED EVENT — this block is meant to be swapped out once the date below has passed.
-           Replace: the image (images/event-fiestas-patrias.jpg), the h3 title, the .event-meta
-           date/time line, and the description paragraph. Keep the badge, the Instagram button,
-           and the .event-evergreen line as-is for the next event. -->
       <div class="event-card">
-        <div class="photo-placeholder event-photo has-photo" role="img" aria-label="Volante del evento: Fiestas Patrias con Jimena Kollmann en vivo, domingo 26 de julio desde las 3 p. m., en Chimpun Callao" style="background-image: url('images/event-fiestas-patrias.jpg');"></div>
+        <div class="photo-placeholder event-photo has-photo" role="img" aria-label="Afiche del evento Fiestas Patrias con Jimena Kollmann en Chimpun Callao, domingo 26 de julio desde las 3 PM" style="background-image: url('images/event-fiestas-patrias.png'); background-position: center;"></div>
         <div class="event-details">
-          <span class="event-badge">Próximo evento</span>
-          <h3>Celebración de Fiestas Patrias</h3>
-          <p class="event-meta">Domingo 26 de julio &middot; Desde las 3:00 p. m.</p>
-          <p>Música en vivo con Jimena Kollmann para celebrar las Fiestas Patrias del Perú — baladas, salsa, cumbia y el ambiente festivo de siempre, en 43 Howe Avenue, Passaic, NJ.</p>
+          <span class="event-badge">Evento Pasado</span>
+          <p class="event-meta">Domingo 26 de Julio &middot; Desde las 3 PM</p>
+          <h3>Fiestas Patrias — &iexcl;Viva el Per&uacute;! con Jimena Kollmann</h3>
+          <p>M&uacute;sica en vivo para celebrar nuestras Fiestas Patrias &mdash; del Callao para New Jersey.</p>
+          <ul class="event-features">
+            <li>Baladas, salsa, cumbia y m&aacute;s</li>
+            <li>Buena m&uacute;sica, buena comida y buen ambiente</li>
+            <li>Celebremos juntos con orgullo ser peruanos</li>
+          </ul>
+          <p>Síguenos en Instagram para conocer las próximas presentaciones y celebraciones.</p>
+          <!--
+            Marcador de posición: la URL de Instagram de abajo es la cuenta pública
+            confirmada del restaurante, pero este botón NO implementa sincronización
+            automática de eventos. Sin API de Instagram, sin tokens de acceso, sin
+            búsqueda de hashtags, sin funciones serverless, sin widgets de terceros y
+            sin publicaciones simuladas. La sincronización automática de futuros
+            eventos desde Instagram podría implementarse más adelante como una
+            integración aparte, si el restaurante lo aprueba.
+          -->
           <a href="https://www.instagram.com/chimpuncallaopassaic/" target="_blank" rel="noopener" class="btn btn-outline">Ver próximos eventos en Instagram</a>
-          <p class="event-evergreen">Música, celebraciones y comunidad — Chimpun Callao celebra la cultura peruana durante todo el año.</p>
-        </div>
-      </div>
-      <!-- END FEATURED EVENT -->
-    </div>
-  </section>
-
-  <!-- ============ CATERING Y EVENTOS PRIVADOS ============ -->
-  <section class="section catering" id="catering">
-    <div class="section-inner">
-      <div class="catering-intro">
-        <p class="eyebrow center">Catering y Eventos Privados</p>
-        <h2 class="section-title center">Que Chimpun Callao Sea Parte de tu Próxima Celebración</h2>
-        <p class="section-lead center">Desde bodas hasta reuniones familiares, el verdadero sabor del Callao para tu evento.</p>
-      </div>
-
-      <div class="catering-proof">
-        <div class="photo-placeholder catering-photo has-photo" role="img" aria-label="Buffet de catering de Chimpun Callao en una boda real" style="background-image: url('images/catering-buffet.jpg');"></div>
-        <div class="catering-proof-text">
-          <h3>Con Experiencia en Celebraciones Reales</h3>
-          <p>Chimpun Callao ya ha preparado el buffet completo de una boda — prueba real de que esta cocina puede con tu evento, no solo una idea.</p>
-        </div>
-      </div>
-
-      <ul class="catering-list">
-        <li>Bodas</li>
-        <li>Cumpleaños</li>
-        <li>Reuniones familiares</li>
-        <li>Celebraciones</li>
-        <li>Eventos privados</li>
-        <li>Preparación de buffet y catering</li>
-        <li>Comida fresca y recién preparada</li>
-      </ul>
-
-      <div class="catering-ctas">
-        <a href="#catering-form" class="btn btn-primary">Solicitar catering</a>
-        <a href="tel:+19732464450" class="btn btn-secondary">Llamar para catering</a>
-      </div>
-
-      <!-- Formulario de catering (demostración) -->
-      <div class="catering-form-wrap" id="catering-form">
-        <h3>Solicitud de Catering y Eventos</h3>
-        <p class="form-disclaimer">Esta es una demostración. Este formulario no envía, transmite ni almacena información personal.</p>
-
-        <form id="catering-request-form" novalidate>
-          <div class="form-row">
-            <label for="cf-name">Nombre</label>
-            <input type="text" id="cf-name" name="name" placeholder="Tu nombre completo">
-            <span class="field-error" id="err-name" hidden>Este campo es obligatorio.</span>
-          </div>
-          <div class="form-row form-row-split">
-            <div>
-              <label for="cf-phone">Teléfono</label>
-              <input type="tel" id="cf-phone" name="phone" placeholder="(555) 555-5555">
-              <span class="field-error" id="err-phone" hidden>Este campo es obligatorio.</span>
-            </div>
-            <div>
-              <label for="cf-email">Correo electrónico</label>
-              <input type="email" id="cf-email" name="email" placeholder="tu@correo.com">
-            </div>
-          </div>
-          <div class="form-row form-row-split">
-            <div>
-              <label for="cf-event-type">Tipo de evento</label>
-              <select id="cf-event-type" name="eventType">
-                <option value="">Selecciona una opción</option>
-                <option>Boda</option>
-                <option>Cumpleaños / celebración familiar</option>
-                <option>Evento corporativo</option>
-                <option>Otro</option>
-              </select>
-            </div>
-            <div>
-              <label for="cf-event-date">Fecha del evento</label>
-              <input type="date" id="cf-event-date" name="eventDate">
-            </div>
-          </div>
-          <div class="form-row form-row-split">
-            <div>
-              <label for="cf-guests">Cantidad estimada de invitados</label>
-              <input type="number" id="cf-guests" name="guests" min="1" placeholder="ej. 50">
-            </div>
-            <div>
-              <label for="cf-service">Tipo de servicio</label>
-              <select id="cf-service" name="service">
-                <option value="">Selecciona una opción</option>
-                <option>Recogida de buffet</option>
-                <option>Entrega a domicilio</option>
-                <option>Servicio con personal</option>
-                <option>Aún no estoy seguro</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-row">
-            <label for="cf-menu-interests">Platos o menú de interés</label>
-            <input type="text" id="cf-menu-interests" name="menuInterests" placeholder="ej. estación de ceviche, anticuchos, desayunos">
-          </div>
-          <div class="form-row">
-            <label for="cf-notes">Comentarios</label>
-            <textarea id="cf-notes" name="notes" rows="3" placeholder="Cualquier otro detalle que Chimpun Callao deba saber"></textarea>
-          </div>
-
-          <button type="submit" class="btn btn-primary btn-full">Enviar Solicitud de Catering (Demostración)</button>
-        </form>
-
-        <div class="form-confirmation" id="form-confirmation" hidden>
-          <p><strong>Esta es una demostración.</strong> En el sitio final, su solicitud será enviada directamente al restaurante.</p>
-          <p>Enviar una solicitud no confirma el pedido de catering. El restaurante confirmará disponibilidad, menú, precios, detalles del servicio y el pago después.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ============ VISÍTANOS ============ -->
+  <!-- ============ CONTÁCTANOS / VISÍTANOS ============ -->
   <section class="section visit" id="visit">
     <div class="section-inner visit-grid">
       <div class="visit-info">
@@ -269,13 +199,12 @@
         <h2 class="section-title">Encuéntranos en Passaic</h2>
         <p class="visit-address">43 Howe Avenue<br>Passaic, NJ 07055</p>
         <p class="visit-hours">Abierto todos los días de 10:00 a. m. a 10:00 p. m.</p>
+        <p class="visit-phone">Tel: <a href="tel:+19732464450">(973) 246-4450</a></p>
 
         <div class="visit-actions">
-          <a href="tel:+19732464450" class="btn btn-primary">Llamar (973) 246-4450</a>
+          <a href="tel:+19732464450" class="btn btn-primary btn-caps">Llamar ahora</a>
           <a href="https://www.google.com/maps/dir/?api=1&destination=43+Howe+Ave,+Passaic,+NJ+07055" target="_blank" rel="noopener" class="btn btn-secondary">Cómo llegar</a>
         </div>
-
-        <div class="photo-placeholder visit-photo has-photo trim-edge-strong" role="img" aria-label="Letrero de Chimpun Callao dentro del restaurante" style="background-image: url('images/logo-wall-clean.jpg');"></div>
       </div>
       <div class="directions-card">
         <svg class="directions-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
