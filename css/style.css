@@ -849,7 +849,7 @@ select { appearance: auto; }
 }
 /* Kept relatively flat/consistent (not ramping up to near-opaque black at the bottom)
    so the placeholder pattern stays visibly present through the whole hero -- letting the
-   NEXT section's clearly different --charcoal background (below) be what visually ends
+   NEXT section's --black-soft background (below) be what visually ends
    the hero, instead of the hero quietly fading into a matching near-black itself. */
 .owners-hero-scrim {
   position: absolute; inset: 0;
@@ -877,18 +877,18 @@ select { appearance: auto; }
 }
 .owners-hero-lead { color: var(--cream-dim); font-size: 1.05rem; }
 
-/* Alternating black / warm-charcoal rhythm carries the section separation through the
-   whole page. --charcoal is deliberately much warmer/lighter than --black-soft was
-   here before, so each transition reads as an obvious, intentional section change
-   rather than two near-identical shades of near-black. This is the PRIMARY separation
+/* Alternating black / black-soft rhythm carries the section separation through the
+   whole page, matching the neutral dark tone already used site-wide (mini-serie,
+   menu-preview, etc.) instead of the previous warmer brown-charcoal, which read as an
+   inconsistent color cast on this page. This is the PRIMARY separation
    mechanism -- the single red divider before the timeline (see .section-divide-top
    on that section in quienessomos/index.html) is secondary, used once, not on every
    boundary. */
-.owners-story { background: var(--charcoal); }
+.owners-story { background: var(--black-soft); }
 .owners-profile { background: var(--black); }
-.owners-profile-reverse { background: var(--charcoal); }
+.owners-profile-reverse { background: var(--black-soft); }
 .owners-timeline-section { background: var(--black); }
-.owners-gallery-section { background: var(--charcoal); }
+.owners-gallery-section { background: var(--black-soft); }
 
 .owners-story-body { max-width: 720px; margin: 0 auto; }
 
