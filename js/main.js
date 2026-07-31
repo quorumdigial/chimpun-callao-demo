@@ -238,11 +238,11 @@
   if (menuCategoryCards.length && menuModalBackdrop && menuModal && menuModalTitle &&
       menuModalRows && menuModalNotice && menuModalCloseIcon && menuModalCloseBtn) {
 
-    var MENU_MODAL_CLOSE_MS = 260; // must match the .closing transition duration in CSS
-    var MENU_CARD_PRESS_MS = 160; // must match .is-pressed transition duration in CSS
-    // Explicit per-row delays (ms after the modal begins) rather than a flat multiplier,
-    // per the requested 100 / 180-200 / 260-300ms schedule.
-    var MENU_MODAL_ROW_DELAYS_MS = [100, 190, 280];
+    var MENU_MODAL_CLOSE_MS = 360; // must match the .closing transition duration in CSS
+    var MENU_CARD_PRESS_MS = 180; // must match .is-pressed transition duration in CSS
+    // Explicit per-row delays (ms after the modal begins, i.e. after 'open' is added)
+    // rather than a flat multiplier, per the requested ~340 / ~470 / ~600ms schedule.
+    var MENU_MODAL_ROW_DELAYS_MS = [340, 470, 600];
 
     var menuModalOpen = false;
     var menuModalClosingTimer = null;
@@ -325,7 +325,6 @@
       if (menuModalClosingTimer) {
         clearTimeout(menuModalClosingTimer);
         menuModalClosingTimer = null;
-        menuModalBackdrop.classList.remove('closing');
       }
 
       lastMenuTrigger = trigger;
@@ -336,25 +335,35 @@
       trigger.classList.add('is-pressed');
       window.setTimeout(function () { trigger.classList.remove('is-pressed'); }, MENU_CARD_PRESS_MS);
 
+      // Reveal the modal in its CLOSED/initial state first -- 'open' not yet added,
+      // 'closing' removed in case this reopens a modal that was still mid-close.
+      menuModalBackdrop.classList.remove('open', 'closing');
       menuModalBackdrop.hidden = false;
-      // Force a reflow so the following class change triggers the CSS transition
-      // instead of jumping straight to the open state.
-      void menuModalBackdrop.offsetHeight;
-      menuModalBackdrop.classList.add('open');
-      document.body.classList.add('menu-preview-modal-open');
-      menuModalOpen = true;
 
-      document.addEventListener('keydown', onMenuModalKeydown);
-      menuModalBackdrop.addEventListener('click', onMenuModalBackdropClick);
+      // Two nested requestAnimationFrame calls guarantee the browser actually paints
+      // that initial state on its own frame before 'open' is applied. A single forced
+      // reflow (reading offsetHeight) was tried in an earlier round and was not
+      // reliable enough -- occasionally the browser coalesced the "reveal" and "open"
+      // style changes into one recalc and the transition appeared to skip straight to
+      // its end state instead of animating (reported as "barely noticeable"/"skipped").
+      // This is a rendering-correctness fix, not a timing delay: the two frames add
+      // roughly 32ms at 60fps, not an arbitrary wait.
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          menuModalBackdrop.classList.add('open');
+          document.body.classList.add('menu-preview-modal-open');
+          menuModalOpen = true;
 
-      // Move focus into the modal so keyboard/assistive-tech users land there
-      // immediately; the heading and content are already readable at this point.
-      // Deferred one tick: when the trigger is a focusable element (tabindex="0"),
-      // the browser's own "focus the clicked element" default action can run after
-      // this click handler finishes and would otherwise silently pull focus right
-      // back to the card. Running after that settles guarantees focus ends up in
-      // the modal instead.
-      window.setTimeout(function () { menuModal.focus(); }, 0);
+          document.addEventListener('keydown', onMenuModalKeydown);
+          menuModalBackdrop.addEventListener('click', onMenuModalBackdropClick);
+
+          // Move focus into the modal once the entrance is underway. Deferred one
+          // more tick: when the trigger is a focusable element (tabindex="0"), the
+          // browser's own "focus the clicked element" default action can otherwise
+          // run after this and pull focus right back to the card.
+          window.setTimeout(function () { menuModal.focus(); }, 0);
+        });
+      });
     }
 
     function closeMenuModal() {
