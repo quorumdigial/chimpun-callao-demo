@@ -811,6 +811,16 @@ select { appearance: auto; }
   overflow: hidden;
 }
 .owners-hero-photo { position: absolute; inset: 0; }
+/* This is the only .photo-placeholder instance sitting under the dark .owners-hero-scrim
+   below, and that extra darkening compounds with the shared pattern's already-subtle
+   opacity, making the diagonal texture read as almost flat here. Nudge just this
+   instance's stripe opacity up (still low-contrast, not the shared rule) so the area
+   keeps reading as an intentional placeholder rather than a blank background. */
+.owners-hero-photo {
+  background:
+    repeating-linear-gradient(135deg, rgba(200,32,44,0.16) 0 14px, rgba(243,232,211,0.065) 14px 28px),
+    var(--black-soft);
+}
 /* Kept relatively flat/consistent (not ramping up to near-opaque black at the bottom)
    so the placeholder pattern stays visibly present through the whole hero -- letting the
    NEXT section's clearly different --charcoal background (below) be what visually ends
