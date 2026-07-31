@@ -688,14 +688,20 @@ a:focus-visible, button:focus-visible {
 @media (min-width: 901px) and (max-width: 1024px) {
   .catering { background-position: center 80%; }
 }
-/* 1025px and up (laptop through large desktop) now all share the desktop-approved crop.
-   Cover's zoom is width-bound, so it keeps zooming in further as the viewport grows --
-   at 80% (or 76%) that read as noticeably tighter/fewer-trays than desired. 69% is the
-   approved desktop reference (~5-5.5 trays visible) and is now applied from laptop widths
-   up through large desktop, so all three share the same richer buffet-spread framing.
-   Tablet landscape/portrait and mobile (<=1024px) are untouched above. */
-@media (min-width: 1025px) {
-  .catering { background-position: center 69%; }
+/* 1025px and up (laptop through large desktop): cover's zoom is width-bound, so a wider
+   viewport is more zoomed in on the same tall source photo, and 69% no longer matched the
+   approved wide/tray-forward reference crop at any of these widths (confirmed by direct
+   pixel comparison against the approved reference screenshots). Because the zoom level
+   differs between laptop and desktop/large-desktop widths, one shared percentage can't
+   reproduce the same framing at both -- so this range is split in two, each tuned to its
+   own reference so the visible tray count reads as "essentially the same" across laptop,
+   desktop, and large desktop. Tablet landscape/portrait and mobile (<=1024px) are
+   untouched above. */
+@media (min-width: 1025px) and (max-width: 1439px) {
+  .catering { background-position: center 80%; }
+}
+@media (min-width: 1440px) {
+  .catering { background-position: center 76%; }
 }
 .catering-proof-text h2 { font-size: 1.5rem; margin-bottom: 0.5rem; }
 .catering-proof-text p { color: var(--cream-dim); font-size: 1.02rem; margin-bottom: 0; }
