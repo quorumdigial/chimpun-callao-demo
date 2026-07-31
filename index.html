@@ -130,30 +130,51 @@
       <p class="section-lead center">Una vez disponible el menú completo, cada categoría abrirá una ventana con sus platos y precios.</p>
 
       <div class="menu-grid">
-        <div class="menu-category featured">
+        <!-- Each card below is a keyboard/mouse/touch-operable trigger for the shared
+             menu preview modal (markup + logic near the end of <body>, behavior in
+             js/main.js). data-category keys map to SITE_CONFIG.MENU_CATEGORIES so the
+             one reusable modal knows which heading to show -- no per-card duplication. -->
+        <div class="menu-category featured" role="button" tabindex="0" data-category="menu-del-dia" aria-haspopup="dialog" aria-controls="menu-preview-modal" aria-label="Vista previa del menú: Menú del Día">
           <span class="menu-tag">Desde $10.99</span>
           <h3>Menú del Día</h3>
           <p>Un menú diario pensado para el valor y porciones generosas.</p>
         </div>
-        <div class="menu-category">
+        <div class="menu-category" role="button" tabindex="0" data-category="a-la-parrilla" aria-haspopup="dialog" aria-controls="menu-preview-modal" aria-label="Vista previa del menú: A la Parrilla">
           <h3>A la Parrilla</h3>
           <p>Anticuchos y clásicos peruanos preparados al fuego, con el sazón tradicional de la parrilla.</p>
         </div>
-        <div class="menu-category">
+        <div class="menu-category" role="button" tabindex="0" data-category="mariscos" aria-haspopup="dialog" aria-controls="menu-preview-modal" aria-label="Vista previa del menú: Mariscos">
           <h3>Mariscos</h3>
           <p>Platos de mariscos frescos preparados al estilo costeño peruano.</p>
         </div>
-        <div class="menu-category">
+        <div class="menu-category" role="button" tabindex="0" data-category="comida-criolla" aria-haspopup="dialog" aria-controls="menu-preview-modal" aria-label="Vista previa del menú: Comida Criolla">
           <h3>Comida Criolla</h3>
           <p>Clásicos criollos peruanos, llenos de sabor y tradición familiar.</p>
         </div>
-        <div class="menu-category">
+        <div class="menu-category" role="button" tabindex="0" data-category="chifa" aria-haspopup="dialog" aria-controls="menu-preview-modal" aria-label="Vista previa del menú: Chifa">
           <h3>Chifa</h3>
           <p>Platos de inspiración chifa — la fusión peruano-china con todo su sabor.</p>
         </div>
       </div>
     </div>
   </section>
+
+  <!-- ============ MODAL: vista previa de categoría de menú ============
+       Un solo componente modal reutilizable -- su encabezado y contenido de vista previa
+       se actualizan según la categoría seleccionada (ver js/main.js). Permanece oculto
+       (hidden) e inerte hasta que una tarjeta de categoría lo activa. -->
+  <div class="menu-preview-modal-backdrop" id="menu-preview-modal-backdrop" hidden>
+    <div class="menu-preview-modal" id="menu-preview-modal" role="dialog" aria-modal="true" aria-labelledby="menu-preview-modal-title" tabindex="-1">
+      <button type="button" class="menu-preview-modal-close" id="menu-preview-modal-close" aria-label="Cerrar vista previa del menú">
+        <span aria-hidden="true">&times;</span>
+      </button>
+      <p class="menu-preview-modal-eyebrow">Vista Previa del Menú</p>
+      <h3 class="menu-preview-modal-title" id="menu-preview-modal-title"></h3>
+      <ul class="menu-preview-modal-rows" id="menu-preview-modal-rows"></ul>
+      <p class="menu-preview-modal-notice" id="menu-preview-modal-notice"></p>
+      <button type="button" class="btn btn-secondary menu-preview-modal-close-btn" id="menu-preview-modal-close-btn">Cerrar</button>
+    </div>
+  </div>
 
   <!-- ============ MÚSICA EN VIVO Y EVENTOS ============ -->
   <section class="section events" id="events">
