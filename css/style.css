@@ -568,7 +568,27 @@ section[id] { scroll-margin-top: 110px; }
 .footer-socials a { font-weight: 600; letter-spacing: 0.02em; }
 .footer-socials a:hover { color: var(--red); }
 .footer-address, .footer-hours { color: var(--cream-dim); font-size: 0.98rem; }
-.footer-credit { color: var(--cream-dim); font-size: 0.9rem; margin-top: 0.5rem; }
+.footer-credit { color: var(--cream-dim); font-size: 0.8rem; margin-top: 0.5rem; }
+/* "Diseñado por" stays light/quiet -- regular weight, the dimmer of the two footer
+   cream tones -- so "Quorum Digital" reads as the more intentional, sharper element,
+   without either one competing with the restaurant info above the divider. */
+.footer-credit-label { font-weight: 400; color: var(--cream-dim); }
+/* "Quorum Digital" credit link: distinct from the site's own Anton display face (too
+   heavy/poster-like for a small footer line) and from plain Inter body text -- restrained
+   semibold weight (not heavy bold) plus a touch of negative letter-spacing keeps a
+   sleek, logo-inspired feel while staying secondary; muted cream (same dim tone as the
+   label) so weight alone -- not color contrast -- carries the distinction, using only
+   the Inter weights already loaded for this project (no new font added). */
+.footer-credit-link {
+  color: var(--cream-dim);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+}
+.footer-credit-link:hover,
+.footer-credit-link:focus-visible {
+  color: var(--red);
+}
 .footer-disclosure {
   margin-top: 1.5rem;
   padding-top: 1.5rem;
