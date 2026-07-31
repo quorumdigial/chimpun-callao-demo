@@ -107,8 +107,6 @@
         firstInvalid.focus();
         return;
       }
-
-      form.hidden = true;
       confirmation.hidden = false;
       confirmation.scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
