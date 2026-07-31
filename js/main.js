@@ -28,7 +28,29 @@
        Flip this to true only after the real video has been added to video/ --
        that is the single switch that makes the browser start requesting/playing it. */
     ENABLE_HERO_VIDEO: false,
-    HERO_VIDEO_SRC: 'video/chimpun-hero-cooking.mp4'
+    HERO_VIDEO_SRC: 'video/chimpun-hero-cooking.mp4',
+
+    /* Menú — vista previa animada por categoría (ventana modal) ----
+       Ninguno de estos platos, descripciones o precios ha sido confirmado por el
+       restaurante todavía -- son marcadores de posición explícitos, nunca ofertas
+       reales. TODO(restaurante/Quorum Digital): reemplazar MENU_PREVIEW_ROWS con los
+       platos, descripciones y precios reales de cada categoría en cuanto el
+       restaurante los confirme. Las claves de MENU_CATEGORIES deben seguir
+       coincidiendo con los atributos data-category de las tarjetas en index.html. */
+    MENU_CATEGORIES: {
+      'menu-del-dia': 'Menú del Día',
+      'a-la-parrilla': 'A la Parrilla',
+      'mariscos': 'Mariscos',
+      'comida-criolla': 'Comida Criolla',
+      'chifa': 'Chifa'
+    },
+    MENU_PREVIEW_LABEL: 'Vista Previa del Menú',
+    MENU_PREVIEW_ROWS: [
+      { name: 'Plato 01 — Información Pendiente', desc: 'Descripción y precio pendientes de recibir.' },
+      { name: 'Plato 02 — Información Pendiente', desc: 'Descripción y precio pendientes de recibir.' },
+      { name: 'Plato 03 — Información Pendiente', desc: 'Descripción y precio pendientes de recibir.' }
+    ],
+    MENU_PREVIEW_NOTICE: 'El menú completo, los platos y los precios serán añadidos cuando el restaurante proporcione la información final.'
   };
 
   /* ---- Encabezado fijo: sombra al hacer scroll ---- */
@@ -194,5 +216,179 @@
     } else {
       showStaticPhotoOnly(); // covers both "disabled" and "prefers-reduced-motion" cases
     }
+  }
+
+  /* ---- Vista previa de categoría de menú (modal reutilizable) ----
+     Las cinco tarjetas de categoría en la sección "Una Probada de Nuestro Menú" son
+     activadores de un único modal reutilizable: su encabezado y contenido se
+     actualizan según la categoría seleccionada, sin duplicar el marcado del modal por
+     categoría. Todo el contenido de los platos es marcador de posición explícito
+     (ver SITE_CONFIG.MENU_PREVIEW_ROWS arriba) hasta que el restaurante confirme el
+     menú real. Este bloque se protege con comprobaciones de existencia de elementos
+     para no lanzar errores si esta sección no está presente en una página. */
+  var menuCategoryCards = document.querySelectorAll('.menu-category[data-category]');
+  var menuModalBackdrop = document.getElementById('menu-preview-modal-backdrop');
+  var menuModal = document.getElementById('menu-preview-modal');
+  var menuModalTitle = document.getElementById('menu-preview-modal-title');
+  var menuModalRows = document.getElementById('menu-preview-modal-rows');
+  var menuModalNotice = document.getElementById('menu-preview-modal-notice');
+  var menuModalCloseIcon = document.getElementById('menu-preview-modal-close');
+  var menuModalCloseBtn = document.getElementById('menu-preview-modal-close-btn');
+
+  if (menuCategoryCards.length && menuModalBackdrop && menuModal && menuModalTitle &&
+      menuModalRows && menuModalNotice && menuModalCloseIcon && menuModalCloseBtn) {
+
+    var MENU_MODAL_CLOSE_MS = 220; // must match the .closing transition duration in CSS
+    var MENU_MODAL_ROW_STAGGER_MS = 65; // within the 50-80ms range requested
+
+    var menuModalOpen = false;
+    var menuModalClosingTimer = null;
+    var lastMenuTrigger = null;
+
+    var menuPrefersReducedMotion = window.matchMedia &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    var populateMenuModal = function (categoryKey) {
+      var categoryName = SITE_CONFIG.MENU_CATEGORIES[categoryKey] || '';
+      menuModalTitle.textContent = categoryName;
+      menuModalNotice.textContent = SITE_CONFIG.MENU_PREVIEW_NOTICE;
+
+      menuModalRows.innerHTML = '';
+      SITE_CONFIG.MENU_PREVIEW_ROWS.forEach(function (row, index) {
+        var li = document.createElement('li');
+        li.className = 'menu-preview-modal-row';
+        // Restrained stagger only when motion is allowed -- otherwise every row uses
+        // its default (no) animation-delay, and the CSS reduced-motion rule plus the
+        // site-wide 0.01ms duration override make the reveal effectively instant.
+        if (!menuPrefersReducedMotion) {
+          li.style.animationDelay = (index * MENU_MODAL_ROW_STAGGER_MS) + 'ms';
+        }
+
+        var name = document.createElement('p');
+        name.className = 'menu-preview-modal-row-name';
+        name.textContent = row.name;
+
+        var desc = document.createElement('p');
+        desc.className = 'menu-preview-modal-row-desc';
+        desc.textContent = row.desc;
+
+        li.appendChild(name);
+        li.appendChild(desc);
+        menuModalRows.appendChild(li);
+      });
+    };
+
+    var getMenuModalFocusable = function () {
+      return menuModal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+    };
+
+    var onMenuModalKeydown = function (e) {
+      if (e.key === 'Escape') {
+        closeMenuModal();
+        return;
+      }
+      if (e.key !== 'Tab') return;
+
+      var focusable = getMenuModalFocusable();
+      if (!focusable.length) return;
+      var first = focusable[0];
+      var last = focusable[focusable.length - 1];
+
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
+    var onMenuModalBackdropClick = function (e) {
+      // Only the backdrop itself closes the modal -- clicks on modal content must
+      // never close it (e.target will be inside .menu-preview-modal, not the backdrop).
+      if (e.target === menuModalBackdrop) {
+        closeMenuModal();
+      }
+    };
+
+    function openMenuModal(trigger) {
+      var categoryKey = trigger.getAttribute('data-category');
+      if (!categoryKey || !SITE_CONFIG.MENU_CATEGORIES[categoryKey]) return;
+
+      if (menuModalClosingTimer) {
+        clearTimeout(menuModalClosingTimer);
+        menuModalClosingTimer = null;
+        menuModalBackdrop.classList.remove('closing');
+      }
+
+      lastMenuTrigger = trigger;
+      populateMenuModal(categoryKey);
+
+      // Brief, subtle pressed feedback on the selected card -- removed shortly after so
+      // the card is never left permanently changed once the modal is open.
+      trigger.classList.add('is-pressed');
+      window.setTimeout(function () { trigger.classList.remove('is-pressed'); }, 200);
+
+      menuModalBackdrop.hidden = false;
+      // Force a reflow so the following class change triggers the CSS transition
+      // instead of jumping straight to the open state.
+      void menuModalBackdrop.offsetHeight;
+      menuModalBackdrop.classList.add('open');
+      document.body.classList.add('menu-preview-modal-open');
+      menuModalOpen = true;
+
+      document.addEventListener('keydown', onMenuModalKeydown);
+      menuModalBackdrop.addEventListener('click', onMenuModalBackdropClick);
+
+      // Move focus into the modal so keyboard/assistive-tech users land there
+      // immediately; the heading and content are already readable at this point.
+      // Deferred one tick: when the trigger is a focusable element (tabindex="0"),
+      // the browser's own "focus the clicked element" default action can run after
+      // this click handler finishes and would otherwise silently pull focus right
+      // back to the card. Running after that settles guarantees focus ends up in
+      // the modal instead.
+      window.setTimeout(function () { menuModal.focus(); }, 0);
+    }
+
+    function closeMenuModal() {
+      if (!menuModalOpen) return;
+      menuModalOpen = false;
+
+      menuModalBackdrop.classList.remove('open');
+      menuModalBackdrop.classList.add('closing');
+      document.body.classList.remove('menu-preview-modal-open');
+      document.removeEventListener('keydown', onMenuModalKeydown);
+      menuModalBackdrop.removeEventListener('click', onMenuModalBackdropClick);
+
+      var closeDuration = menuPrefersReducedMotion ? 0 : MENU_MODAL_CLOSE_MS;
+      var triggerToRestore = lastMenuTrigger;
+      menuModalClosingTimer = window.setTimeout(function () {
+        menuModalBackdrop.hidden = true;
+        menuModalBackdrop.classList.remove('closing');
+        menuModalClosingTimer = null;
+        if (triggerToRestore) {
+          triggerToRestore.focus();
+        }
+      }, closeDuration);
+    }
+
+    menuCategoryCards.forEach(function (card) {
+      card.addEventListener('click', function () {
+        openMenuModal(card);
+      });
+      // Native <button> elements get Enter/Space for free, but these cards are
+      // role="button" divs, so Enter and Space are wired up explicitly per the
+      // standard ARIA button keyboard pattern. Space is prevented to stop the page
+      // from scrolling while the card is focused.
+      card.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+          e.preventDefault();
+          openMenuModal(card);
+        }
+      });
+    });
+
+    menuModalCloseIcon.addEventListener('click', closeMenuModal);
+    menuModalCloseBtn.addEventListener('click', closeMenuModal);
   }
 })();
