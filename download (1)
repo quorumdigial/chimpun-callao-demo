@@ -1,0 +1,12 @@
+# Normalize line endings for text files across platforms/editors.
+* text=auto eol=lf
+
+# Treat these as binary so git never tries to diff/merge or rewrite line endings in them.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.mp4 binary
+*.mov binary
+*.webm binary
