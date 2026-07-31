@@ -650,10 +650,29 @@ a:focus-visible, button:focus-visible {
 
 /* No divider here on purpose -- both internal pages now use exactly one principal
    red divider each (Quiénes Somos: before the timeline; Catering: before the form),
-   per feedback that separators were being overused across the page. */
+   per feedback that separators were being overused across the page.
+   No background set here deliberately (original/untouched behavior) -- this wrapper is
+   transparent and shows the page's default var(--black) through, which on Catering
+   happens to exactly match .catering-form-section above it, so that page's ending already
+   reads as one continuous dark zone with no code change needed. A background value was
+   briefly added here to fix a Quiénes Somos-specific seam, but that inadvertently shifted
+   Catering's button-wrap shade too (both pages share this class) -- moved to a scoped
+   rule below instead, so this base rule stays exactly as originally authored. */
 .back-home-link-wrap {
   text-align: center;
   padding: 2.5rem 1.25rem 4rem;
+}
+/* Quiénes Somos-specific override: unlike Catering, the section directly above this one
+   here is .owners-gallery-section (var(--black-soft), a noticeably warmer/lighter shade
+   used for the alternating content rhythm), so leaving this transparent (matching
+   Catering's approach) would show var(--black) here -- a shade between the warmer
+   content section and the black footer, reintroducing a visible seam. Matching
+   .owners-gallery-section's background groups the button with the content it belongs to,
+   letting the footer be the one clear transition afterward. Scoped via the
+   adjacent-sibling selector so this only applies here, not on Catering's untouched
+   instance. */
+.owners-gallery-section + .back-home-link-wrap {
+  background: var(--black-soft);
 }
 
 /* --- Catering page ---
