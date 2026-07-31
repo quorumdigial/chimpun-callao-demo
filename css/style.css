@@ -458,16 +458,36 @@ section[id] { scroll-margin-top: 110px; }
 .menu-category.is-pressed {
   transform: scale(0.97);
   box-shadow: 0 0 0 2px rgba(200,32,44,0.6);
-  transition: transform 0.16s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.16s ease;
+  transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.18s ease;
 }
 
 /* --- Menu preview modal ---
    One reusable modal (see js/main.js for open/close/populate logic). Hidden via the
-   `hidden` attribute until a category card activates it. Animates only opacity/transform
-   per the site's motion guidelines; @media (prefers-reduced-motion: reduce) near the
-   bottom of this file already collapses all transition/animation durations to ~0, and
-   the per-row stagger delay is only ever added by JS when the visitor has not
-   requested reduced motion. */
+   `hidden` attribute until a category card activates it.
+
+   Coordinated opening sequence (all triggered by the single `.open` class, staggered
+   via per-element `transition-delay` rather than separate JS timers, so the sequence
+   can't drift out of sync):
+     0ms    backdrop begins fading in (finishes ~420ms)
+     140ms  modal begins rising + scaling into place (finishes ~840ms)
+     230ms  heading fades/rises into view (finishes ~650ms)
+     260ms  red accent line reveals left-to-right (finishes ~740ms)
+     340/470/600ms  the three placeholder rows enter in sequence (each ~420ms)
+     650ms  pending notice + Cerrar button settle in (finishes ~990ms)
+   Total opening sequence lands within the requested ~850-1000ms window.
+
+   IMPORTANT (why a double requestAnimationFrame is used in js/main.js instead of a
+   single forced-reflow trick): revealing the backdrop (removing `hidden`) and adding
+   `.open` in the very same synchronous tick risks the browser coalescing both style
+   changes into one recalc/paint, which can make the transition appear to skip straight
+   to its end state instead of animating -- reported as "the animation is barely
+   noticeable" / "being skipped". Two nested rAF calls guarantee the browser has
+   actually painted the initial (closed) state on its own frame before `.open` is
+   applied, so the transition reliably runs. Animates only opacity/transform (plus
+   scaleX for the accent line) per the site's motion guidelines;
+   @media (prefers-reduced-motion: reduce) near the bottom of this file zeroes every
+   transition/animation duration AND delay used here, so reduced-motion visitors get an
+   immediate state change with no sequencing, translation, scaling, or stagger. */
 .menu-preview-modal-backdrop {
   position: fixed;
   inset: 0;
@@ -478,9 +498,7 @@ section[id] { scroll-margin-top: 110px; }
   padding: 1.25rem;
   background: rgba(12,11,10,0);
   opacity: 0;
-  /* Backdrop is intentionally quicker than the modal's entrance (below) so the
-     darkening settles first and the modal is felt to rise into an already-dim stage. */
-  transition: opacity 0.3s ease, background 0.3s ease;
+  transition: opacity 0.42s ease, background 0.42s ease;
 }
 /* The `hidden` attribute (toggled in JS) is what actually removes the modal from
    layout/accessibility/focus when fully closed -- no separate visibility toggle is
@@ -493,7 +511,7 @@ section[id] { scroll-margin-top: 110px; }
 }
 .menu-preview-modal-backdrop.closing {
   opacity: 0;
-  transition: opacity 0.26s ease, background 0.26s ease;
+  transition: opacity 0.34s ease, background 0.34s ease;
 }
 body.menu-preview-modal-open { overflow: hidden; }
 
@@ -509,8 +527,8 @@ body.menu-preview-modal-open { overflow: hidden; }
   padding: 2.25rem 1.75rem 1.75rem;
   position: relative;
   opacity: 0;
-  transform: translateY(32px) scale(0.945);
-  transition: opacity 0.46s cubic-bezier(0.22, 1, 0.36, 1), transform 0.46s cubic-bezier(0.22, 1, 0.36, 1);
+  transform: translateY(40px) scale(0.93);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.14s, transform 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.14s;
 }
 .menu-preview-modal:focus { outline: none; }
 .menu-preview-modal-backdrop.open .menu-preview-modal {
@@ -519,8 +537,8 @@ body.menu-preview-modal-open { overflow: hidden; }
 }
 .menu-preview-modal-backdrop.closing .menu-preview-modal {
   opacity: 0;
-  transform: translateY(20px) scale(0.97);
-  transition: opacity 0.26s ease-in, transform 0.26s ease-in;
+  transform: translateY(24px) scale(0.96);
+  transition: opacity 0.36s ease-in, transform 0.36s ease-in;
 }
 
 .menu-preview-modal-close {
@@ -556,6 +574,13 @@ body.menu-preview-modal-open { overflow: hidden; }
 .menu-preview-modal-title {
   font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2rem);
   margin: 0 0 0.6rem;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.42s cubic-bezier(0.16, 1, 0.3, 1) 0.23s, transform 0.42s cubic-bezier(0.16, 1, 0.3, 1) 0.23s;
+}
+.menu-preview-modal-backdrop.open .menu-preview-modal-title {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* Thin red accent line beneath the category heading -- reveals left-to-right via
@@ -570,21 +595,17 @@ body.menu-preview-modal-open { overflow: hidden; }
   margin: 0 0 1.2rem;
   transform-origin: left center;
   transform: scaleX(0);
-  transition: transform 0.36s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.26s;
 }
 .menu-preview-modal-backdrop.open .menu-preview-modal-accent { transform: scaleX(1); }
-.menu-preview-modal-backdrop.closing .menu-preview-modal-accent {
-  transform: scaleX(0);
-  transition: transform 0.2s ease-in;
-}
 
 .menu-preview-modal-rows { list-style: none; margin: 0 0 1.5rem; padding: 0; }
 .menu-preview-modal-row {
   padding: 0.9rem 0;
   border-bottom: 1px solid rgba(243,232,211,0.12);
   opacity: 0;
-  transform: translateY(12px);
-  animation: menuPreviewRowIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  transform: translateY(14px);
+  animation: menuPreviewRowIn 0.42s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 .menu-preview-modal-row:last-child { border-bottom: none; }
 .menu-preview-modal-row-name {
@@ -598,7 +619,7 @@ body.menu-preview-modal-open { overflow: hidden; }
 .menu-preview-modal-row-desc { margin: 0; color: var(--cream-dim); font-size: 0.9rem; }
 
 @keyframes menuPreviewRowIn {
-  from { opacity: 0; transform: translateY(12px); }
+  from { opacity: 0; transform: translateY(14px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -609,9 +630,41 @@ body.menu-preview-modal-open { overflow: hidden; }
   border-top: 1px solid rgba(243,232,211,0.12);
   padding-top: 1rem;
   margin: 0 0 1.5rem;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.34s cubic-bezier(0.16, 1, 0.3, 1) 0.65s, transform 0.34s cubic-bezier(0.16, 1, 0.3, 1) 0.65s;
+}
+.menu-preview-modal-backdrop.open .menu-preview-modal-notice {
+  opacity: 1;
+  transform: translateY(0);
 }
 
-.menu-preview-modal-close-btn { width: 100%; }
+.menu-preview-modal-close-btn {
+  width: 100%;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.34s cubic-bezier(0.16, 1, 0.3, 1) 0.65s, transform 0.34s cubic-bezier(0.16, 1, 0.3, 1) 0.65s;
+}
+.menu-preview-modal-backdrop.open .menu-preview-modal-close-btn {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Closing: the modal container's own fade+move+scale (above) is the only exit motion.
+   Freeze all children at their fully-revealed resting state and cancel their entrance
+   transitions/animation so they don't replay in reverse (which would otherwise use
+   their long entrance delays and appear to detach from the box already fading away
+   beneath them) -- the whole box then exits as one cohesive block. */
+.menu-preview-modal-backdrop.closing .menu-preview-modal-title,
+.menu-preview-modal-backdrop.closing .menu-preview-modal-accent,
+.menu-preview-modal-backdrop.closing .menu-preview-modal-row,
+.menu-preview-modal-backdrop.closing .menu-preview-modal-notice,
+.menu-preview-modal-backdrop.closing .menu-preview-modal-close-btn {
+  transition: none;
+  animation: none;
+  opacity: 1;
+  transform: none;
+}
 
 /* --- Events --- */
 .event-card {
@@ -1204,7 +1257,13 @@ select { appearance: auto; }
   .back-home-link-wrap { padding-top: 2.5rem; }
   .catering { padding: 2.75rem 1.1rem 2.5rem; }
   .menu-preview-modal-backdrop { padding: 1rem; }
-  .menu-preview-modal { padding: 2rem 1.35rem 1.5rem; max-height: calc(100vh - 2rem); }
+  .menu-preview-modal {
+    padding: 2rem 1.35rem 1.5rem;
+    max-height: calc(100vh - 2rem);
+    /* Same entrance direction/duration/easing as desktop -- only the travel distance
+       and starting scale are slightly reduced, appropriate for a smaller viewport. */
+    transform: translateY(30px) scale(0.94);
+  }
 }
 
 /* Respect reduced-motion preference: kill smooth scroll, hover-lift, and panel transitions */
@@ -1216,11 +1275,22 @@ select { appearance: auto; }
     scroll-behavior: auto !important;
   }
   /* The rule above already collapses the modal's own transition/animation durations
-     (including the card press, backdrop fade, modal rise/scale, and the accent
-     line's scaleX reveal) to ~0, but animation-delay (used for the row stagger) is a
-     separate property -- zero it explicitly so reduced-motion visitors never see a
-     staggered reveal, only an effectively-instant one. js/main.js also skips setting
-     per-row delay at all when prefers-reduced-motion matches, so this is a defensive
-     backstop. */
-  .menu-preview-modal-row { animation-delay: 0ms !important; }
+     (card press, backdrop fade, modal rise/scale, heading, accent scaleX reveal, rows,
+     notice/Cerrar) to ~0, but transition-delay/animation-delay are separate properties
+     -- the coordinated opening sequence relies on several (modal 0.14s, title 0.23s,
+     accent 0.26s, notice/close-btn 0.65s, plus each row's JS-set delay). Zero all of
+     them explicitly so reduced-motion visitors get one immediate state change with no
+     perceptible sequencing, not a fast-forwarded version of the same staggered reveal.
+     js/main.js also skips setting a per-row delay at all when prefers-reduced-motion
+     matches, so the row rule below is a defensive backstop. */
+  .menu-preview-modal-backdrop,
+  .menu-preview-modal,
+  .menu-preview-modal-title,
+  .menu-preview-modal-accent,
+  .menu-preview-modal-row,
+  .menu-preview-modal-notice,
+  .menu-preview-modal-close-btn {
+    transition-delay: 0ms !important;
+    animation-delay: 0ms !important;
+  }
 }
