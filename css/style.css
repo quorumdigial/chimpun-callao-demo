@@ -450,9 +450,16 @@ section[id] { scroll-margin-top: 110px; }
   outline: 2px solid var(--red);
   outline-offset: 3px;
 }
-/* Brief, subtle pressed feedback on selection -- class is added and removed by JS
-   shortly after, so the card never stays visually changed once the modal is open. */
-.menu-category.is-pressed { transform: scale(0.985); transition: transform 0.12s ease; }
+/* Brief, noticeable pressed feedback on selection -- class is added and removed by JS
+   shortly after (see MENU_CARD_PRESS_MS in js/main.js), so the card never stays
+   visually changed once the modal is open. Only the pressed state transitions; the
+   class removal snaps back immediately, matching a quick "press" feel rather than an
+   eased release. */
+.menu-category.is-pressed {
+  transform: scale(0.97);
+  box-shadow: 0 0 0 2px rgba(200,32,44,0.6);
+  transition: transform 0.16s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.16s ease;
+}
 
 /* --- Menu preview modal ---
    One reusable modal (see js/main.js for open/close/populate logic). Hidden via the
@@ -471,7 +478,9 @@ section[id] { scroll-margin-top: 110px; }
   padding: 1.25rem;
   background: rgba(12,11,10,0);
   opacity: 0;
-  transition: opacity 0.24s ease, background 0.24s ease;
+  /* Backdrop is intentionally quicker than the modal's entrance (below) so the
+     darkening settles first and the modal is felt to rise into an already-dim stage. */
+  transition: opacity 0.3s ease, background 0.3s ease;
 }
 /* The `hidden` attribute (toggled in JS) is what actually removes the modal from
    layout/accessibility/focus when fully closed -- no separate visibility toggle is
@@ -484,7 +493,7 @@ section[id] { scroll-margin-top: 110px; }
 }
 .menu-preview-modal-backdrop.closing {
   opacity: 0;
-  transition: opacity 0.2s ease, background 0.2s ease;
+  transition: opacity 0.26s ease, background 0.26s ease;
 }
 body.menu-preview-modal-open { overflow: hidden; }
 
@@ -500,8 +509,8 @@ body.menu-preview-modal-open { overflow: hidden; }
   padding: 2.25rem 1.75rem 1.75rem;
   position: relative;
   opacity: 0;
-  transform: translateY(16px) scale(0.97);
-  transition: opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1), transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateY(32px) scale(0.945);
+  transition: opacity 0.46s cubic-bezier(0.22, 1, 0.36, 1), transform 0.46s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .menu-preview-modal:focus { outline: none; }
 .menu-preview-modal-backdrop.open .menu-preview-modal {
@@ -510,8 +519,8 @@ body.menu-preview-modal-open { overflow: hidden; }
 }
 .menu-preview-modal-backdrop.closing .menu-preview-modal {
   opacity: 0;
-  transform: translateY(8px) scale(0.98);
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transform: translateY(20px) scale(0.97);
+  transition: opacity 0.26s ease-in, transform 0.26s ease-in;
 }
 
 .menu-preview-modal-close {
@@ -546,7 +555,27 @@ body.menu-preview-modal-open { overflow: hidden; }
 }
 .menu-preview-modal-title {
   font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2rem);
-  margin: 0 0 1.4rem;
+  margin: 0 0 0.6rem;
+}
+
+/* Thin red accent line beneath the category heading -- reveals left-to-right via
+   scaleX (transform only, per the site's animate-only-opacity/transform rule). A
+   restrained, one-time reveal: no glow, pulse, or continuous motion. */
+.menu-preview-modal-accent {
+  display: block;
+  width: 64px;
+  height: 3px;
+  background: var(--red);
+  border-radius: 2px;
+  margin: 0 0 1.2rem;
+  transform-origin: left center;
+  transform: scaleX(0);
+  transition: transform 0.36s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.menu-preview-modal-backdrop.open .menu-preview-modal-accent { transform: scaleX(1); }
+.menu-preview-modal-backdrop.closing .menu-preview-modal-accent {
+  transform: scaleX(0);
+  transition: transform 0.2s ease-in;
 }
 
 .menu-preview-modal-rows { list-style: none; margin: 0 0 1.5rem; padding: 0; }
@@ -554,8 +583,8 @@ body.menu-preview-modal-open { overflow: hidden; }
   padding: 0.9rem 0;
   border-bottom: 1px solid rgba(243,232,211,0.12);
   opacity: 0;
-  transform: translateY(10px);
-  animation: menuPreviewRowIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform: translateY(12px);
+  animation: menuPreviewRowIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 .menu-preview-modal-row:last-child { border-bottom: none; }
 .menu-preview-modal-row-name {
@@ -569,7 +598,7 @@ body.menu-preview-modal-open { overflow: hidden; }
 .menu-preview-modal-row-desc { margin: 0; color: var(--cream-dim); font-size: 0.9rem; }
 
 @keyframes menuPreviewRowIn {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -1187,9 +1216,11 @@ select { appearance: auto; }
     scroll-behavior: auto !important;
   }
   /* The rule above already collapses the modal's own transition/animation durations
-     to ~0, but animation-delay (used for the row stagger) is a separate property --
-     zero it explicitly so reduced-motion visitors never see a staggered reveal, only
-     an effectively-instant one. js/main.js also skips setting per-row delay at all
-     when prefers-reduced-motion matches, so this is a defensive backstop. */
+     (including the card press, backdrop fade, modal rise/scale, and the accent
+     line's scaleX reveal) to ~0, but animation-delay (used for the row stagger) is a
+     separate property -- zero it explicitly so reduced-motion visitors never see a
+     staggered reveal, only an effectively-instant one. js/main.js also skips setting
+     per-row delay at all when prefers-reduced-motion matches, so this is a defensive
+     backstop. */
   .menu-preview-modal-row { animation-delay: 0ms !important; }
 }
