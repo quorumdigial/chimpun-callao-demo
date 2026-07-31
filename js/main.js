@@ -238,8 +238,11 @@
   if (menuCategoryCards.length && menuModalBackdrop && menuModal && menuModalTitle &&
       menuModalRows && menuModalNotice && menuModalCloseIcon && menuModalCloseBtn) {
 
-    var MENU_MODAL_CLOSE_MS = 220; // must match the .closing transition duration in CSS
-    var MENU_MODAL_ROW_STAGGER_MS = 65; // within the 50-80ms range requested
+    var MENU_MODAL_CLOSE_MS = 260; // must match the .closing transition duration in CSS
+    var MENU_CARD_PRESS_MS = 160; // must match .is-pressed transition duration in CSS
+    // Explicit per-row delays (ms after the modal begins) rather than a flat multiplier,
+    // per the requested 100 / 180-200 / 260-300ms schedule.
+    var MENU_MODAL_ROW_DELAYS_MS = [100, 190, 280];
 
     var menuModalOpen = false;
     var menuModalClosingTimer = null;
@@ -261,7 +264,11 @@
         // its default (no) animation-delay, and the CSS reduced-motion rule plus the
         // site-wide 0.01ms duration override make the reveal effectively instant.
         if (!menuPrefersReducedMotion) {
-          li.style.animationDelay = (index * MENU_MODAL_ROW_STAGGER_MS) + 'ms';
+          var delay = MENU_MODAL_ROW_DELAYS_MS[index];
+          if (delay === undefined) {
+            delay = MENU_MODAL_ROW_DELAYS_MS[MENU_MODAL_ROW_DELAYS_MS.length - 1] + (index - MENU_MODAL_ROW_DELAYS_MS.length + 1) * 90;
+          }
+          li.style.animationDelay = delay + 'ms';
         }
 
         var name = document.createElement('p');
@@ -324,10 +331,10 @@
       lastMenuTrigger = trigger;
       populateMenuModal(categoryKey);
 
-      // Brief, subtle pressed feedback on the selected card -- removed shortly after so
-      // the card is never left permanently changed once the modal is open.
+      // Brief, noticeable pressed feedback on the selected card -- removed shortly
+      // after so the card is never left permanently changed once the modal is open.
       trigger.classList.add('is-pressed');
-      window.setTimeout(function () { trigger.classList.remove('is-pressed'); }, 200);
+      window.setTimeout(function () { trigger.classList.remove('is-pressed'); }, MENU_CARD_PRESS_MS);
 
       menuModalBackdrop.hidden = false;
       // Force a reflow so the following class change triggers the CSS transition
