@@ -1,0 +1,200 @@
+// Chimpun Callao — Demostración privada
+// Preparado por Quorum Digital. Este script no transmite ni almacena datos.
+
+(function () {
+  'use strict';
+
+  /* ---- Configuración del sitio (constantes fáciles de editar/reemplazar) ----
+     Diego y Gimena pueden agregar futuros episodios de la Mini-serie SIN pedirle
+     al desarrollador que modifique el sitio cada vez. Solo necesitan:
+       1. Subir el nuevo episodio a su canal de YouTube.
+       2. Agregarlo a su lista de reproducción pública "Mini-serie Chimpun Callao".
+       3. Reordenar la lista en YouTube si quieren que el episodio más reciente
+          aparezca primero.
+     Una vez que YOUTUBE_PLAYLIST_ID de abajo tenga el ID real de esa lista de
+     reproducción, agregar episodios nuevos en YouTube NO requiere editar ni volver
+     a publicar este sitio. El embed de YouTube es público: no usa ni expone
+     ninguna clave de API en este frontend. */
+  var SITE_CONFIG = {
+    YOUTUBE_PLAYLIST_ID: 'REPLACE_WITH_PLAYLIST_ID',
+    YOUTUBE_CHANNEL_URL: 'https://www.youtube.com/@REPLACE_WITH_CHANNEL_HANDLE',
+    YOUTUBE_PLAYLIST_URL: 'https://www.youtube.com/playlist?list=REPLACE_WITH_PLAYLIST_ID',
+
+    /* Hero background cooking video -- OFF by default on purpose: the real file
+       (video/chimpun-hero-cooking.mp4) has not been provided yet. While this is
+       false, the <video> element in index.html is never given a <source>, so the
+       browser never requests video/chimpun-hero-cooking.mp4 and the existing
+       ceviche photo underneath is the only visible hero background.
+       Flip this to true only after the real video has been added to video/ --
+       that is the single switch that makes the browser start requesting/playing it. */
+    ENABLE_HERO_VIDEO: false,
+    HERO_VIDEO_SRC: 'video/chimpun-hero-cooking.mp4'
+  };
+
+  /* ---- Encabezado fijo: sombra al hacer scroll ---- */
+  var header = document.getElementById('site-header');
+  function onScroll() {
+    if (window.scrollY > 12) {
+      header.classList.add('scrolled');
+    } else {
+      header.classList.remove('scrolled');
+    }
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  /* ---- Menú móvil ---- */
+  var menuToggle = document.getElementById('menu-toggle');
+  var mainNav = document.getElementById('main-nav');
+  var overlay = document.getElementById('mobile-nav-overlay');
+
+  function closeMenu() {
+    menuToggle.classList.remove('open');
+    menuToggle.setAttribute('aria-expanded', 'false');
+    menuToggle.setAttribute('aria-label', 'Abrir menú de navegación');
+    mainNav.classList.remove('open');
+    overlay.classList.remove('visible');
+    document.body.classList.remove('nav-open');
+  }
+  function toggleMenu() {
+    var isOpen = mainNav.classList.toggle('open');
+    menuToggle.classList.toggle('open', isOpen);
+    menuToggle.setAttribute('aria-expanded', String(isOpen));
+    menuToggle.setAttribute('aria-label', isOpen ? 'Cerrar menú de navegación' : 'Abrir menú de navegación');
+    overlay.classList.toggle('visible', isOpen);
+    document.body.classList.toggle('nav-open', isOpen);
+  }
+  menuToggle.addEventListener('click', toggleMenu);
+  overlay.addEventListener('click', closeMenu);
+  mainNav.querySelectorAll('a').forEach(function (link) {
+    link.addEventListener('click', closeMenu);
+  });
+  // Cierra el menú móvil con la tecla Escape, sin importar qué elemento tenga el foco.
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && mainNav.classList.contains('open')) {
+      closeMenu();
+      menuToggle.focus();
+    }
+  });
+
+  /* ---- Formulario de catering: validación local en español, nunca transmite datos ----
+     Este formulario vive solo en catering/index.html -- el resto de las páginas
+     (index.html, quienessomos/index.html) no lo tienen, así que todo este bloque se
+     protege con "if (form)" para no lanzar errores de consola en esas páginas. */
+  var form = document.getElementById('catering-request-form');
+  if (form) {
+    var confirmation = document.getElementById('form-confirmation');
+    var nameInput = document.getElementById('cf-name');
+    var phoneInput = document.getElementById('cf-phone');
+    var errName = document.getElementById('err-name');
+    var errPhone = document.getElementById('err-phone');
+
+    var validateField = function (input, errorEl) {
+      var valid = input.value.trim().length > 0;
+      input.classList.toggle('invalid', !valid);
+      errorEl.hidden = valid;
+      return valid;
+    };
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault(); // Solo demostración -- nunca envía ni almacena datos.
+
+      var nameValid = validateField(nameInput, errName);
+      var phoneValid = validateField(phoneInput, errPhone);
+
+      if (!nameValid || !phoneValid) {
+        var firstInvalid = !nameValid ? nameInput : phoneInput;
+        firstInvalid.focus();
+        return;
+      }
+
+      form.hidden = true;
+      confirmation.hidden = false;
+      confirmation.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+
+    // Limpia el estado de error en cuanto el usuario empieza a corregir el campo.
+    nameInput.addEventListener('input', function () { validateField(nameInput, errName); });
+    phoneInput.addEventListener('input', function () { validateField(phoneInput, errPhone); });
+  }
+
+  /* ---- Reproductor de la Mini-serie (lista de reproducción de YouTube) ----
+     Muestra el embed real de YouTube en cuanto SITE_CONFIG.YOUTUBE_PLAYLIST_ID se
+     reemplace por un ID real; mientras tanto muestra un estado de marcador de
+     posición profesional. No requiere clave de API de YouTube. */
+  var playerHost = document.getElementById('mini-serie-player');
+  var youtubeLink = document.getElementById('mini-serie-youtube-link');
+  var playlistConfigured = !!(SITE_CONFIG.YOUTUBE_PLAYLIST_ID &&
+    SITE_CONFIG.YOUTUBE_PLAYLIST_ID.indexOf('REPLACE_WITH') === -1);
+
+  if (playerHost) {
+    if (playlistConfigured) {
+      var iframe = document.createElement('iframe');
+      iframe.src = 'https://www.youtube.com/embed/videoseries?list=' + encodeURIComponent(SITE_CONFIG.YOUTUBE_PLAYLIST_ID);
+      iframe.title = 'Mini-serie de Chimpun Callao — lista de reproducción de YouTube';
+      iframe.loading = 'lazy';
+      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+      iframe.allowFullscreen = true;
+      playerHost.appendChild(iframe);
+    } else {
+      playerHost.classList.add('player-placeholder');
+      playerHost.setAttribute('role', 'img');
+      playerHost.setAttribute('aria-label', 'Video de la Mini-serie próximamente — lista de reproducción de YouTube pendiente de configurar');
+      var placeholderInner = document.createElement('div');
+      placeholderInner.className = 'player-placeholder-inner';
+      placeholderInner.innerHTML =
+        '<span class="player-placeholder-icon" aria-hidden="true">▶</span>' +
+        '<p>Muy pronto: la Mini-serie en YouTube</p>' +
+        '<p class="placeholder-note">Este espacio mostrará automáticamente la lista de reproducción en cuanto se configure el ID real en SITE_CONFIG.</p>';
+      playerHost.appendChild(placeholderInner);
+    }
+  }
+
+  if (youtubeLink) {
+    youtubeLink.href = playlistConfigured ? SITE_CONFIG.YOUTUBE_PLAYLIST_URL : SITE_CONFIG.YOUTUBE_CHANNEL_URL;
+  }
+
+  /* ---- Video de fondo del hero ----
+     Solo intenta cargar/reproducir el video si SITE_CONFIG.ENABLE_HERO_VIDEO es true
+     (es decir, una vez que exista el archivo real) Y el visitante no pidió reduced-motion.
+     Mientras ENABLE_HERO_VIDEO sea false (el estado por defecto hoy), este bloque NUNCA
+     agrega una <source>, por lo que el navegador jamás solicita
+     video/chimpun-hero-cooking.mp4 y la foto de ceviche existente (la capa .hero-photo,
+     detrás del elemento <video>) sigue siendo el único fondo visible, sin cambios.
+
+     Cuando el video real esté disponible y esta bandera pase a true, el <video>:
+       - usa autoplay + muted + loop + playsinline (sin controles visibles)
+       - se posiciona en toda el área del hero con object-fit: cover
+       - usa la foto de ceviche actual como poster (imagen mientras carga)
+       - si el archivo falla al cargar o reproducirse, vuelve a ocultarse
+         automáticamente y dejará ver de nuevo la foto de ceviche de fondo (capa
+         .hero-photo, que nunca se elimina del DOM) -- así el hero jamás se queda
+         en blanco ni roto por un archivo de video defectuoso. */
+  var heroVideo = document.getElementById('hero-video');
+  if (heroVideo) {
+    var prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    var showStaticPhotoOnly = function () {
+      heroVideo.style.display = 'none'; // .hero-photo underneath remains the only visible background
+    };
+
+    if (SITE_CONFIG.ENABLE_HERO_VIDEO && !prefersReducedMotion) {
+      heroVideo.addEventListener('error', showStaticPhotoOnly);
+      heroVideo.addEventListener('stalled', showStaticPhotoOnly);
+
+      var source = document.createElement('source');
+      source.src = SITE_CONFIG.HERO_VIDEO_SRC;
+      source.type = 'video/mp4';
+      heroVideo.appendChild(source);
+      heroVideo.muted = true; // required by browsers for autoplay to be allowed
+      heroVideo.setAttribute('autoplay', '');
+      heroVideo.load();
+      heroVideo.play().catch(function () {
+        /* Autoplay blocked by the browser -- the ceviche poster/photo underneath
+           already shows through, so no further fallback handling is needed here. */
+      });
+    } else {
+      showStaticPhotoOnly(); // covers both "disabled" and "prefers-reduced-motion" cases
+    }
+  }
+})();
